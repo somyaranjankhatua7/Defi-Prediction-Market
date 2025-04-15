@@ -14,7 +14,27 @@ contract GovernanceManager {
     mapping(address => uint256) public varifiedUser;
     uint256 public stakeForGovernance = 1 ether;
 
-    event JoinedGovernance(address indexed user, uint256 stake, bool varified);
+    /**
+     * Event triggered when a user successfully joins the governance system
+     * - 'user' is the address of the user joining governance
+     * - 'stake' is the amount of ETH the user staked to join the governance
+     * - 'verified' indicates whether the user has been verified as a governance
+     * participant (true if verified, false otherwise)
+     * */
+    event JoinedGovernance(address indexed user, uint256 stake, bool verified);
+
+    /**
+     * Event triggered when a user exits the governance system
+     * - 'user' is the address of the user exiting governance
+     * - 'amountWithdraw' is the amount of ETH withdrawn when exiting governance
+     * - 'exit' indicates if the user successfully exited governance
+     * (true if they exited, false if exit failed)
+     */
+    event ExitedGovernance(
+        address indexed user,
+        uint256 amountWithdraw,
+        bool exit
+    );
 
     constructor() {
         governanceManager = msg.sender;
@@ -26,5 +46,18 @@ contract GovernanceManager {
         require(varifiedUser[msg.sender] == 0, "Already joined in governance.");
         varifiedUser[msg.sender] = msg.value;
         emit JoinedGovernance(msg.sender, msg.value, true);
+    }
+
+    // Function for users to exit governance (withdraw their stake)
+    function exitGovernance() public {
+        require(
+            varifiedUser[msg.sender] >= 1 ether,
+            "Not verified in governance."
+        );
+        uint256 stake = varifiedUser[msg.sender];
+        delete varifiedUser[msg.sender];
+        (bool status, ) = payable(msg.sender).call{value: stake}("");
+        require(status, "Failed to send Ether");
+        emit ExitedGovernance(msg.sender, stake, true);
     }
 }
