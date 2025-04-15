@@ -2,18 +2,16 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
-import {Counter} from "../src/Counter.sol";
+import {GovernanceManager} from "../src/GovernanceManager.sol";
 
 contract CounterScript is Script {
-    Counter public counter;
-
+    GovernanceManager public governanceManager;
+    
     function setUp() public {}
 
     function run() public {
         vm.startBroadcast();
-
-        counter = new Counter();
-
+        governanceManager = new GovernanceManager();
         vm.stopBroadcast();
     }
 }
